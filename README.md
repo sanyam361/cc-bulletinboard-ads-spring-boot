@@ -74,7 +74,7 @@ The service endpoints are secured, that means no unauthorized user can access th
 
 Test the REST Service `http://localhost:8080/api/v1/ads` manually using the `Postman` chrome extension.
 
-![Post Request using Postman](https://github.wdf.sap.corp/cc-java-dev/cc-coursematerial/blob/master/CreateMicroservice/images/RestClient_PostRequest.png)
+![Post Request using Postman](https://github.com/ccjavadev/cc-bulletinboard-ads-spring-boot/blob/master/CreateMicroservice/images/RestClient_PostRequest.png)
 
 **Note**: For all requests make sure, that you provide a header namely `Authorization` with a JWT token as value e.g. `Bearer eyJhbGciOiJSUzI1NiIs...`. You can generate a valid JWT token as described [in Exercise 24](https://github.wdf.sap.corp/cc-java-dev/cc-coursematerial/blob/master/Security/Exercise_24_MakeYourApplicationSecure.md).
 
