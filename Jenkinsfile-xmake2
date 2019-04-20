@@ -1,0 +1,287 @@
+#!groovy
+
+def xmakeServer = 'xmake-dev'
+def repositoryOwner = 'cc-refapp'
+def repositoryName = 'cc-bulletinboard-ads-spring-boot'
+def jobName = repositoryOwner + '-' + repositoryName + '-SP-MS-common'
+def repoFullName = repositoryOwner + '/' + repositoryName
+
+def artifactId = 'bulletinboard-ads-spring-boot'
+def stagingRepoId = ''
+releaseMetadataUrl = ''
+
+def adsArtifactId = 'bulletinboard-ads-spring-boot'
+def adsAppName = 'bulletinboard-ads-spring-boot'
+def adsZipFileName = 'cc-bulletinboard-ads-spring-boot.zip'
+
+CF_DOMAIN = 'cfapps.sap.hana.ondemand.com'
+
+node {
+    deleteDir()
+    git url: 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard-ads-spring-boot.git'
+    def nexusHelper = load 'Jenkinsfiles/nexus.Jenkinsfile'
+    def deploymentHelper = load 'Jenkinsfiles/deployment.Jenkinsfile'
+    def utilHelper = load 'Jenkinsfiles/utilities.Jenkinsfile'
+    def xmakeHelper = load 'Jenkinsfiles/xmake.Jenkinsfile'
+
+    helpers = [
+            nexus: nexusHelper,
+            deploy: deploymentHelper,
+            xmake: xmakeHelper,
+            util: utilHelper
+    ]
+}
+
+stage('Commit-xmake') {
+    helpers.util.cleanNode {
+        git url: 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard-ads-spring-boot.git'
+
+        automaticVersioning = load 'Jenkinsfiles/automaticVersioning.Jenkinsfile'
+        version = automaticVersioning.automaticVersioningMvn()
+        echo 'version: ' + version
+
+        try {
+            commitId = helpers.util.getCommitId()
+            echo 'commitId: ' + commitId
+
+            stagingResult = helpers.xmake.xmakeStageBuild(xmakeServer, jobName, repoFullName, commitId)
+
+            echo 'stagingRepoId: ' + stagingResult.stagingRepoId
+            echo 'stagingRepoUrl: ' + stagingResult.stagingRepoUrl
+
+        } finally {
+            try {
+                //step([$class: 'WarningsPublisher', canComputeNew: false, canResolveRelativePaths: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', messagesPattern: '', parserConfigurations: [[parserName: 'xmake-maven', pattern: 'target/xmake-logs/build_*_build-deploy-workflow.log']], unHealthy: ''])
+                helpers.util.reportJunitResultsSureFire()
+                helpers.util.reportJunitResultsFailSafe()
+
+                //helper.staticCodeAnalysis()
+            } catch (e) {
+                echo "Error reporting test results: ${e}"
+            }
+        }
+    }
+}
+
+/*
+stage('Integration') {
+    helpers.util.cleanNode {
+        def spacename = 'refapp-integration-ads'
+        def environmentFile = "${pwd()}/common/automation-environment/AWS_Canary/bulletinboard-environment.yml"
+        dir('common') {
+            git 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard.git'
+        }
+
+        helpers.deploy.withinTemporaryCfSpace(spacename, environmentFile, 'common') {
+            dir('common') {
+                deployApprouter(spacename)
+            }
+
+            parallel users: {
+                deployUsersFromNexus(spacename, CF_DOMAIN)
+            }, statistics: {
+                deployLatestStatisticsFromNexus(spacename)
+            }, ads: {
+                deployAdsFromNexus(version, CF_DOMAIN, stagingResult.stagingRepoUrl)
+            }, failFast: true
+
+            // dir('systemtest') {
+            //   git 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard-systemtests.git'
+            //   sh 'cp $HOME/.m2/settings.xml .'
+            //
+            //   setupConfigProperties()
+            //
+            //   docker.image('maven:latest').inside() {
+            //     sh 'mvn --settings settings.xml -B clean verify -DpropertyFileName=config.properties'
+            //   }
+            //
+            // }
+        }
+
+    }
+}
+
+
+
+stage('Performance') {
+    helpers.util.cleanNode {
+        def spacename = 'refapp-performance-ads'
+        def environmentFile = "${pwd()}/common/automation-environment/AWS_Canary/bulletinboard-environment.yml"
+        dir('common') {
+            git 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard.git'
+
+        }
+
+        helpers.deploy.withinTemporaryCfSpace(spacename, environmentFile, 'common') {
+            dir('common') {
+                deployApprouter(spacename)
+            }
+
+            parallel users: {
+              deployUsersFromNexus(spacename, CF_DOMAIN)
+            }, statistics: {
+                deployLatestStatisticsFromNexus(spacename)
+            }, ads: {
+                deployAdsFromNexus(spacename, version, CF_DOMAIN, stagingResult.stagingRepoUrl)
+            }, failFast: true
+
+
+
+            //TODO: JMeter tests
+        }
+
+    }
+}
+
+*/
+
+stage('Xmake Promote') {
+    echo 'Entering stage Xmake  Promote '
+
+    helpers.util.cleanNode {
+
+        echo 'Trigger xmake Promote'
+        //helperXmake = load 'Jenkinsfiles/xmake.Jenkinsfile'
+
+        releaseMetadataUrl = helpers.xmake.xmakePromote(xmakeServer, jobName, stagingResult.stagingRepoId)
+        echo 'releaseMetadataUrl: ' + releaseMetadataUrl
+
+    }
+}
+
+/*
+stage('Production') {
+    echo 'Entering stage production'
+
+    helpers.util.cleanNode {
+        def spacename = 'refapp-production'
+        def environmentFile = "${pwd()}/common/automation-environment/AWS_Canary/bulletinboard-environment.yml"
+        dir('common') {
+            git 'git@github.wdf.sap.corp:cc-refapp/cc-bulletinboard.git'
+        }
+
+        helpers.deploy.withinExistingCfSpace(spacename, environmentFile) {
+            deployAdsFromNexus(spacename, version)
+        }
+    }
+}
+
+*/
+
+
+def void deployApprouter(spacename) {
+    dir('approuter') {
+        docker.image('node:6.9.4').inside() {
+            sh 'npm install --registry=http://nexus.wdf.sap.corp:8081/nexus/content/groups/build.milestones.npm --proxy=null'
+        }
+        sh "cf push -n bulletinboard-approuter-${spacename}"
+    }
+}
+
+def void deployUsersFromNexus(spacename, version = '0.0.6-391', domain=CF_DOMAIN) {
+    dir('users') {
+        withEnv(["CF_HOME=${pwd()}"]) {
+            helpers.nexus.downloadArtifactWithCurl([groupId: 'com.sap.cc', artifactId: 'bulletinboard-users-service', remoteRepository: remoteRepository, packaging: 'zip', version: version, destination: 'bulletinboard-users-service.zip'])
+            sh 'unzip "bulletinboard-users-service.zip" -d "."'
+            helpers.deploy.blueGreenDeployViaShell('cloudrefapp', space, version, cf_domain, mainhost)
+        }
+    }
+}
+
+
+def void deployLatestStatisticsFromNexus(space, repository = NEXUS_RELEASE_REPOSITORY, domain = CF_DOMAIN) {
+    dir('statistics') {
+        withEnv(["CF_HOME=${pwd()}"]) {
+            def zipFileName = "downloadedArtifact.zip"
+            helpers.nexus.downloadArtifact(artifactId: 'bulletinboard-statistics', destination: zipFileName, packaging: 'zip', remoteRepositories: repository)
+            helpers.util.unzipFile(zipFileName)
+            helpers.deploy.deployApplicationWithAppDeployer('bulletinboard-statistics', 'bulletinboard-statistics.war', space, CF_DOMAIN)
+        }
+    }
+}
+
+def void deployAdsFromNexus(space, version, repository = NEXUS_MILESTONE_REPOSITORY, domain = CF_DOMAIN) {
+    dir('ads') {
+        withEnv(["CF_HOME=${pwd()}"]) {
+            def zipFileName = "downloadedArtifact.zip"
+            helpers.nexus.downloadArtifact(artifactId: 'bulletinboard-ads', destination: zipFileName, packaging: 'zip', version: version, remoteRepository: repository)
+            helpers.util.unzipFile(zipFileName)
+            helpers.deploy.deployApplicationWithAppDeployer('bulletinboard-ads', 'bulletinboard-ads.war', space, domain)
+        }
+    }
+}
+
+
+def setupConfigProperties() {
+  sh "cf login -u \${CF_USERNAME} -p \${CF_PASSWORD} -o \${CF_ORGANIZATION} -s \${CF_SPACE} -a \${CF_API_ENDPOINT}"
+  sh 'cf create-service-key uaa-bulletinboard-cc-sap testServiceKey'
+  def testServiceKeyGuid = helpers.util.executeShell "cf service-key --guid uaa-bulletinboard-cc-sap testServiceKey"
+  def testServiceKeyJson = helpers.util.executeShell "cf curl /v2/service_keys/${testServiceKeyGuid}"
+  def clientId = helpers.util.executeShell "echo ${testServiceKeyJson} | jq \".entity.credentials.clientid\""
+  def clientSecret = helpers.util.executeShell "echo ${testServiceKeyJson} | jq \".entity.credentials.clientsecret\""
+  def xsAppName = helpers.util.executeShell "echo ${testServiceKeyJson} | jq \".entity.credentials.xsappname\""
+
+  echo "My service key: ${testServiceKeyJson}"
+
+  // def appGuid = helpers.util.executeShell 'cf app --guid approuter' //TODO: add bulletinboard to appname
+  // sh "cf curl /v2/apps/${appGuid}/env > appEnv.json"
+  // def clientId = helpers.util.executeShell 'cat appEnv.json | jq ".system_env_json.VCAP_SERVICES.xsuaa[] | select(.name == \"uaa-bulletinboard-cc-sap\") | .credentials.clientid" -r'
+  // def clientSecret = helpers.util.executeShell 'cat appEnv.json | jq ".system_env_json.VCAP_SERVICES.xsuaa[] | select(.name == \"uaa-bulletinboard-cc-sap\") | .credentials.clientsecret" -r'
+  // def xsAppName = helpers.util.executeShell 'cat appEnv.json | jq ".system_env_json.VCAP_SERVICES.xsuaa[] | select(.name == \"uaa-bulletinboard-cc-sap\") | .credentials.xsappname" -r'
+
+  //TODO: tenantadmin config in Jenkins withCredentials
+  sh """
+    echo user.url=https://bulletinboard-users-${spacename}.${CF_DOMAIN} > config.properties
+    echo user.endpoint=/api/v1/users >> config.properties
+    echo approuter.url=https://bulletinboard-approuter-${spacename}.${CF_DOMAIN} >> config.properties
+    echo approuter.ads.endpoint=/ads >> config.properties
+    echo saml2.usergroup.admin=UG_Bulletinboard >> config.properties
+    echo fakeidp.url=https://muenchhausen.cfapps.sap.hana.ondemand.com/getauthcode >> config.properties
+    echo fakeidp.tenantadmin.clientid=tenantadmin >> config.properties
+    echo fakeidp.tenantadmin.clientsecret=Abcd1234 >> config.properties
+    echo fakeidp.user.name=testuser >> config.properties
+    echo fakeidp.redirect.url=https://bulletinboard-approuter-${spacename}.${CF_DOMAIN}/login/callback >> config.properties
+    echo xsuaa.url=https://cc-sap.authentication.sap.hana.ondemand.com >> config.properties
+    echo xsuaa.clientid=${clientId} >> config.properties
+    echo xsuaa.clientsecret=${clientSecret} >> config.properties
+    cat config.properties
+  """
+
+  createRoleCollectionForApplication(xsAppName, )
+
+  //run test
+
+
+}
+
+def createRoleCollectionForApplication() {
+
+    //Login to uaa with technical user and get JSESSION_ID
+    //POST to https://xs2security.accounts400.ondemand.com/saml2/idp/sso/xs2security.accounts400.ondemand.com
+      // Cache-Control:private,no-cache,no-store
+      // Connection:Keep-Alive
+      // Content-Encoding:gzip
+      // Content-Language:en-US
+      // Content-Type:text/html;charset=utf-8
+      // Date:Tue, 07 Mar 2017 12:12:20 GMT
+      // Expires:Thu, 01 Jan 1970 00:00:00 GMT
+      // Keep-Alive:timeout=5, max=98
+      // P3P:CP="IDC DSP COR ADM DEVi TAIi PSA PSD IVAi IVDi CONi HIS OUR IND CNT"
+      // Pragma:no-cache
+      // Server:SAP
+      // Set-Cookie:IDP_J_COOKIE=S-IDP-4e85f2fd-6f88-4c33-acc1-b94df6ff93cd; Domain=xs2security.accounts400.ondemand.com; Path=/; HttpOnly; Secure
+      // Set-Cookie:JSESSIONID=""; Expires=Thu, 01-Jan-1970 00:00:10 GMT; Path=/; HttpOnly; Secure
+      // Strict-Transport-Security:max-age=3600;includeSubDomains;preload
+      // Transfer-Encoding:chunked
+      // Vary:Accept-Encoding
+      // X-Content-Type-Options:nosniff
+      // X-IDS-Node:mo-47748875a
+      // X-IDS-Pool:main_green
+      // X-IDS-Region:Europe
+    //Get Roles and get X-csrf-token
+    //https://cc-sap.admin.cfapps.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/RC_Bulletinboard/roles
+    //Put changes with csrf token (only sending new data)
+}
+
+
+

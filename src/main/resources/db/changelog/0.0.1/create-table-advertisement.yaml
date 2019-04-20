@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: abcde
+      changes:
+        - createTable:
+            tableName: advertisement
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: version
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: createdat
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: modifiedat
+                  type: timestamp
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: price
+                  type: number(12,3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contact
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: currency
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: purchasedon
+                  type: timestamp
+              - column:
+                  name: category
+                  type: varchar(255)

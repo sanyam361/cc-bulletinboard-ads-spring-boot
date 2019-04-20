@@ -1,0 +1,321 @@
+{
+	"variables": [],
+	"info": {
+		"name": "PipelineSecurity",
+		"_postman_id": "54596471-d983-f130-4066-bf00078ef39d",
+		"description": "Sequence of Urls which need to be executed in order to test a web application with activated application security in the Continuous Delivery process.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authorize",
+			"description": "Folder contains all requests of the collection which need to be sent first in order to obtain authorizations for all further requests of Postman Collection \"PipelineSecurity\".",
+			"item": [
+				{
+					"name": "1. Get API Access-Token from XSUAA",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/oauth/token",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded",
+								"description": ""
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"description": ""
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "client_id",
+									"value": "sb-bulletinboard-d055988!t895",
+									"description": "Client-ID of the business app to be tested (Source: VCAP_SERVICES)",
+									"type": "text"
+								},
+								{
+									"key": "client_secret",
+									"value": "Utv1e/ZrDnxlWEi0Ney4sW6s7lI=",
+									"description": "Client secret of the business app to be tested (Source: VCAP_SERVICES)",
+									"type": "text"
+								},
+								{
+									"key": "grant_type",
+									"value": "password",
+									"description": "Fixed value",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "cc-auth.admin@objectmail.com",
+									"description": "Username (Source: SAP ID Service - manual creation)",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "cD&dWaA$iTpR!",
+									"description": "Userpassword (Source: SAP ID Service - manual creation)",
+									"type": "text"
+								},
+								{
+									"key": "token_format",
+									"value": "opaque",
+									"description": "Fixed value",
+									"type": "text"
+								},
+								{
+									"key": "response_type",
+									"value": "token",
+									"description": "Fixed value",
+									"type": "text"
+								}
+							]
+						},
+						"description": "Adapt the Body to your configurartion. Especially you need to change the client id and client secret. You obtain these values from the XSUAA Client Credentials String, located in VCAP_SERVICES of those applications (microservices) which are bound to the XSUAA backing service instance.\n\nYou can find the \"access token\" in the Response Body. Use this access token in the HTTP-Header Authorization = Bearer <access_token> for all further requests."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CreateAppAuthorizations",
+			"description": "Folder contains all requests of the collection which need to be sent in order to create authorizations for the business application to be tested.",
+			"item": [
+				{
+					"name": "2. Get RoleTemplates with AppID",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/bulletinboard-d055988!t895/roletemplates",
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {},
+						"description": "Retrieve all role templates of a specific application from XSUAA."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Create Role with RoleTemplate Details",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/bulletinboard-d055988!t895/roletemplates/Advertiser/roles/RoleAdvertiser\n",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"roleTemplateName\":\"Advertiser\",\n\t\"roleTemplateAppId\":\"bulletinboard-d055988!t895\",\n\t\"name\":\"RoleAdvertiser\",\n\t\"description\":\"theDescriptionOfRoleAdvertiser\"\n}"
+						},
+						"description": "Create a new application role based on an application role template."
+					},
+					"response": []
+				},
+				{
+					"name": "4. Create RoleCollection",
+					"request": {
+						"url": {
+							"raw": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/BB_TEST_ROLECOLLECTION?description=theTestRoleCollection",
+							"protocol": "https",
+							"host": [
+								"cc-refapp",
+								"authentication",
+								"sap",
+								"hana",
+								"ondemand",
+								"com"
+							],
+							"path": [
+								"sap",
+								"rest",
+								"authorization",
+								"rolecollections",
+								"BB_TEST_ROLECOLLECTION"
+							],
+							"query": [
+								{
+									"key": "description",
+									"value": "theTestRoleCollection\n",
+									"equals": true,
+									"description": ""
+								}
+							],
+							"variable": []
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Create a role collection"
+					},
+					"response": []
+				},
+				{
+					"name": "5. Add Role to RoleCollection",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/BB_TEST_ROLECOLLECTION/roles\n",
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"roleTemplateName\":\"Advertiser\",\n\t\"roleTemplateAppId\":\"bulletinboard-d055988!t895\",\n\t\"name\":\"RoleAdvertiser\",\n\t\"description\":\"theAdvertiserRole\"\n}"
+						},
+						"description": "Add an application role to an application role collection"
+					},
+					"response": []
+				},
+				{
+					"name": "6. Create RoleCollection Mapping",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/saml-IdP/xsuaa-monitoring-idp/saml-attribute/Groups/equals/UG_CC_M2_USER/rolecollections/BB_TEST_ROLECOLLECTION\n",
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Map the application role collection to a SAML 2 UserGroup"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DeleteAppAuthorizations",
+			"description": "Folder contains all requests of the collection which need to be sent in order to delete the authorizations of the tested business application.",
+			"item": [
+				{
+					"name": "7. Delete RoleCollection Mapping",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/saml-IdP/xsuaa-monitoring-idp/saml-attribute/Groups/equals/UG_CC_M2_USER/rolecollections/BB_TEST_ROLECOLLECTION\n",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Delete role collection mapping(s)"
+					},
+					"response": []
+				},
+				{
+					"name": "8. Delete RoleCollection",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/BB_TEST_ROLECOLLECTION\n",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Deiete role collection(s)"
+					},
+					"response": []
+				},
+				{
+					"name": "9. Delete Role",
+					"request": {
+						"url": "https://cc-refapp.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/bulletinboard-d055988!t895/roletemplates/Advertiser/roles/RoleAdvertiser",
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"description": "Fixed value"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer 2435631f918240d4be753157ec7b25fe",
+								"description": "Access-Token from response of request \"1. Get API Access-Token from XSUAA\""
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"description": "Delete role(s)"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,123 @@
+{
+    "_version": "1.4.0",
+    "sap.app": {
+        "id": "sap.demo.bulletinboard",
+        "type": "application",
+        "resources": "resources.json",
+        "i18n": "i18n/i18n.properties",
+        "title": "Bulletin Board",
+        "description": "Simple bulletin board app",
+        "applicationVersion": {
+            "version": "1.0"
+        },
+        "dataSources": {
+            "mainService": {
+                "uri": "/ads/api/v1/ads",
+                "type": "JSON",
+				"settings": {
+					"localUri": "test/service"
+				}
+            }
+        }
+    },
+    "sap.ui": {
+        "technology": "UI5",
+        "icons": {
+            "icon": "sap-icon://detail-view",
+            "favIcon": "",
+            "phone": "",
+            "phone@2": "",
+            "tablet": "",
+            "tablet@2": ""
+        },
+        "deviceTypes": {
+            "desktop": true,
+            "tablet": true,
+            "phone": true
+        },
+        "supportedThemes": [
+            "sap_hcb",
+            "sap_bluecrystal"
+        ]
+    },
+    "sap.ui5": {
+        "rootView": {
+            "viewName": "sap.demo.bulletinboard.view.App",
+            "type": "XML",
+            "id": "app"
+        },
+        "dependencies": {
+            "minUI5Version": "1.38.0",
+            "libs": {
+                "sap.ui.core": {
+                    "minVersion": "1.38.0"
+                },
+                "sap.m": {
+                    "minVersion": "1.38.0"
+                }
+            }
+        },
+        "contentDensities": {
+            "compact": true,
+            "cozy": true
+        },
+        "models": {
+            "": {
+                "dataSource": "mainService"
+            }
+        },
+        "routing": {
+            "config": {
+                "routerClass": "sap.m.routing.Router",
+                "viewType": "XML",
+                "viewPath": "sap.demo.bulletinboard.view",
+                "controlId": "app",
+                "controlAggregation": "pages",
+                "bypassed": {
+                    "target": ["notFound"]
+                },
+                "async": true
+            },
+
+            "routes": [
+                {
+                    "pattern": "",
+                    "name": "main",
+                    "target": ["main"]
+                },
+                {
+                    "pattern": "NewAd",
+                    "name": "createAd",
+                    "target": ["createAd"]
+                },
+                {
+                    "pattern": "Ads/{adId}",
+                    "name": "ad",
+                    "target": ["ad"]
+                }
+            ],
+
+            "targets": {
+                "main": {
+                    "viewName": "Advertisements",
+                    "viewId": "advertisements",
+                    "viewLevel": 1
+                },
+                "createAd": {
+                    "viewName": "CreateAd",
+                    "viewId": "createAd",
+                    "viewLevel": 2
+                },
+                "ad": {
+                    "viewName": "AdDetails",
+                    "viewId": "adDetails",
+                    "viewLevel": 2
+                },
+                "notFound": {
+                    "viewName": "NotFound",
+                    "viewId": "notFound"
+                }
+            }
+        }
+    }
+}

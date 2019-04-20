@@ -1,0 +1,35 @@
+---
+cf_api_endpoint: https://api.cf.sap.hana.ondemand.com
+cf_organization: CCXCourseTesting
+cf_space: ads-springboot-production
+required-services:
+  - instance_name: postgres-bulletinboard-ads
+    service: postgresql
+    plan: v9.6-dev
+    recreate: false
+  - instance_name: applogs-bulletinboard
+    service: application-logs
+    plan: lite 
+    recreate: false
+  - instance_name: mq-bulletinboard
+    service: rabbitmq
+    plan: v3.6-dev
+    recreate: false
+user-roles:
+  remove-other-users: true
+  manager:
+    - p1941898574 # DL_56C5AF767BCF8419230000C1@exchange.sap.corp
+    - c5261232
+  developer:
+    - p1941898574 # DL_56C5AF767BCF8419230000C1@exchange.sap.corp
+    - c5261232
+  auditor:
+    - p2001056393 # DL_5C409102BD9B81028401AFEA@exchange.sap.corp, new Claude Course-User, so that course participants can see logs, autoscaler demo etc.
+    - p1941898574 # DL_56C5AF767BCF8419230000C1@exchange.sap.corp
+    - c5261232 # Kai-Martin Dittkrist
+    - d035958  # ralf.schmitt-roquette@sap.com, Schmitt-Roquette, Ralf
+    - D048418 # nena.raab@sap.com, Raab, Nena
+    - d052927 # jens.keller@sap.com, Keller, Jens
+    - d055988 # robert.girts@sap.com
+    - d021619 # juergen.heymann@sap.com
+

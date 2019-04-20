@@ -1,0 +1,27 @@
+<mvc:View
+    controllerName="sap.demo.bulletinboard.controller.Advertisements"
+    xmlns:mvc="sap.ui.core.mvc"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core"
+    xmlns:semantic="sap.m.semantic"
+	xmlns="sap.m">
+
+	<semantic:FullscreenPage title="Bulletin Board">
+		<semantic:content>
+			<TileContainer id="AdTiles" tiles="{/value}" tileDelete="handleAdsDelete">
+				<StandardTile number="{price}" numberUnit="{currency}"
+					title="{title}" info="{contact}" press="onSelectAd" />
+			</TileContainer>
+		</semantic:content>
+
+        <semantic:addAction>
+            <semantic:AddAction press="onCreateAd"/>
+        </semantic:addAction>
+        <semantic:customFooterContent>
+            <!-- <Button text="Delete Ads" press="onDeleteAds"/> -->
+            <OverflowToolbarButton icon="sap-icon://delete" text="Delete Ads" press="onDeleteAds"/>
+            <OverflowToolbarButton icon="sap-icon://filter" text="Filter" press="onFilterAds"/>
+        </semantic:customFooterContent>
+        
+	</semantic:FullscreenPage>
+</mvc:View>

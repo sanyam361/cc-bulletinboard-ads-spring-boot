@@ -1,0 +1,20 @@
+/bin/
+target/
+*.log
+.settings/org.eclipse.wst.common.project.facet.*
+npm-debug.log
+node_modules
+
+### user specific files
+manifest-d*.yml
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+# Eclipse
+.classpath
+.project
+/.settings/

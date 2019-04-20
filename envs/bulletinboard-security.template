@@ -1,0 +1,25 @@
+---
+muenchhausen:
+  approuterName: $appName
+  roles:
+    - name: "ViewerRole-$space"
+      description: "Viewer only in $space"
+      templateName: "Viewer"
+    - name: "AdvertiserRole-$space"
+      description: "A real Advertiser in $space"
+      templateName: "Advertiser"
+  roleCollections:
+    - name: "ViewerRC-$space"
+      description: "roleCollection with Viewer only in $space"
+      roles:
+        - "ViewerRole-$space"
+    - name: "MasterRC-$space"
+      description: "roleCollection with all Roles in $space"
+      roles:
+        - "ViewerRole-$space"
+        - "AdvertiserRole-$space"
+  samlMapping:
+    - name: "Advertiser"
+      rcName: "MasterRC-$space"
+    - name: "Viewer"
+      rcName: "ViewerRC-$space"

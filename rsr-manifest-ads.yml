@@ -1,0 +1,37 @@
+---
+cf_api_endpoint: https://api.cf.sap.hana.ondemand.com/
+required-services:
+  - instance_name: postgres-bulletinboard-ads
+    service: postgresql
+    plan: v9.4-dev
+    recreate: false
+  - instance_name: applogs-bulletinboard
+    service: application-logs
+    plan: lite 
+    recreate: false
+applications:
+- name: bulletinboard-ads
+  host: bulletinboard-ads--integration--ccrefapp
+  memory: 800MB
+  path: target/bulletinboard-ads-spring-boot.jar
+  buildpack:  https://github.com/cloudfoundry/java-buildpack.git#v4.6
+  #health-check-type: http
+  #health-check-http-endpoint: /health  
+  env:
+      # Disable Spring Auto Reconfiguration
+      #JBP_CONFIG_SPRING_AUTO_RECONFIGURATION: '{enabled: false}' 
+      JBP_CONFIG_OPEN_JDK_JRE: '{ memory_calculator: { stack_threads: 200 } }'
+      # Use the non-blocking /dev/urandom instead of the default to generate random numbers.
+      # This may help with slow startup times, especially when using Spring Boot.
+      JAVA_OPTS: -Djava.security.egd=file:///dev/./urandom -Xss349k
+      # see https://github.wdf.sap.corp/cc-java-dev/cc-coursematerial/blob/master/Knowledge/JavaMemoryAllocationInCF.md
+      MALLOC_ARENA_MAX: 4
+      
+      USER_ROUTE: 'https://bulletinboard-users-course.cfapps.sap.hana.ondemand.com'
+      # required for selecting the right log appender
+      SPRING_PROFILES_ACTIVE: cloud
+  services:
+    - postgres-bulletinboard-ads
+    - mq-bulletinboard
+    - applogs-bulletinboard
+    - uaa-bulletinboard

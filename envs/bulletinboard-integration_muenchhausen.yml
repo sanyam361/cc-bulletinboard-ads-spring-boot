@@ -1,0 +1,28 @@
+---
+cf_api_endpoint: https://api.cf.sap.hana.ondemand.com/
+cf_organization: CCRefApp
+cf_space: ads-springboot-integration 
+muenchhausen:
+  approuterName: "approuter"
+  roles:
+    - name: "ViewerRole"
+      description: "Viewer only"
+      templateName: "Viewer"
+    - name: "AdvertiserRole"
+      description: "A real Advertiser"
+      templateName: "Advertiser"
+  roleCollections:
+    - name: "ViewerRC"
+      description: "roleCollection with Viewer only"
+      roles:
+        - "ViewerRole"
+    - name: "MasterRC"
+      description: "roleCollection with all Roles"
+      roles:
+        - "ViewerRole"
+        - "AdvertiserRole"
+  samlMapping:
+    - name: "Advertiser"
+      rcName: "MasterRC"
+    - name: "Viewer"
+      rcName: "ViewerRC"

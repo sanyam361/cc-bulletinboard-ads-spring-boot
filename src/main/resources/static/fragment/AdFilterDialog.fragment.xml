@@ -1,0 +1,17 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<ViewSettingsDialog
+		confirm="handleAdsFilterConfirm" id="AdsFilter">
+		<filterItems>
+			<!-- 
+			<ViewSettingsFilterItem multiSelect="false" text="Category" key="1" items="{path: '/'}">
+				<items>
+					<ViewSettingsItem text="{category}" key="{category}" />
+				</items>
+			</ViewSettingsFilterItem>
+			 -->
+			<ViewSettingsFilterItem multiSelect="false" text="Category" key="1" />
+		</filterItems>
+	</ViewSettingsDialog>
+</core:FragmentDefinition>

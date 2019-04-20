@@ -1,0 +1,247 @@
+#!/usr/bin/env groovy
+@Library('piper-lib') _
+
+try {
+    
+    String roleCollectionName = "TEST_COLLECTION_INTEGRATION_ONE"
+    String samlIdName = "TEST_RC_MAP_INTEGRATION_ONE"
+    String subdomain 
+    Header header
+    
+    
+    RoleTemplate viewerRoleTemplate
+    Role testRole 
+                
+    
+    stage('RoleCollectionTest') {
+        lock(resource: "${env.JOB_NAME}/10", inversePrecedence: true) {
+            milestone 10
+            node {
+                deleteDir()
+                Map parameters = [:]
+                Script script = this
+                checkout scm
+
+                setupPipelineEnvironment script: this, storeGithubStatistics: true
+                
+                def cfCredentialsId = parameters.get('cfCredentialsId', script.globalPipelineEnvironment.getConfigProperty('cfCredentialsId'))
+                def cfApiEndpoint = parameters.get('cfApiEndpoint', script.globalPipelineEnvironment.getConfigProperty('cfApiEndpoint'))
+                def cfOrg = parameters.get('cfOrg', script.globalPipelineEnvironment.getConfigProperty('cfOrg'))
+                def cfSpace="getMeMyToken"
+
+                def VCAP = getVCapServiceJson(cfCredentialsId,cfApiEndpoint,cfOrg,cfSpace,'getMeMyToken')
+                
+                Map xsuaaCreds = VCAP.system_env_json.VCAP_SERVICES.xsuaa[0].credentials
+                
+                String clientId = xsuaaCreds.clientid
+                String clientSecret = xsuaaCreds.clientsecret
+                subdomain = xsuaaCreds.identityzone
+                //String xsAppName = xsuaaCreds.xsappname
+                
+                String accessToken=getAccessToken(subdomain,clientId, clientSecret)
+                
+                String xsAppName = "bulletinboard-ads-integration!t895"
+                header = new Header(accessToken)
+                List roleTemplates = getRoleTemplates(subdomain,header, xsAppName) //why? we already defined them in the xs_security.json!
+                
+                viewerRoleTemplate = new RoleTemplate(roleTemplates[0].name,xsAppName)
+                testRole = new Role("testRole","descriptionOfTestRole",viewerRoleTemplate)
+                
+                createRoleFromTemplate(subdomain,header,testRole)
+                createRoleCollection(subdomain, header,roleCollectionName,"descriptionOfTestCollection")
+                
+                addRoleToCollection(subdomain,header,roleCollectionName,testRole)
+                createMapOfRoleCollectionToSamlId(subdomain,header,roleCollectionName,samlIdName)
+            }
+        }
+    }
+    
+//    input "cleanup of created Roles, RoleCollection and Mapping"
+    
+    stage('RoleCollectionTest') {
+        lock(resource: "${env.JOB_NAME}/20", inversePrecedence: true) {
+            milestone 20
+            node {
+                deleteDir()
+                deleteMapOfRoleCollectionToSamlId(subdomain,header,roleCollectionName,samlIdName)
+                deleteRoleCollection(subdomain, header,roleCollectionName)        
+                deleteRole(subdomain,header,testRole)
+                
+            }
+        }
+    }
+    
+} catch (Throwable err) { // catch all exceptions
+    globalPipelineEnvironment.addError(this, err)
+    throw err
+} finally {
+    node{
+        writeInflux script: this
+        sendNotificationMail script: this
+    }
+}
+
+def getJsonFromShellComand(String comand) {
+    def jsonResult=sh(returnStdout: true,script:comand).trim()
+    println "jsonResult: $jsonResult"
+    return readJSON(text:jsonResult)
+}
+
+public def getVCapServiceJson(String cfCredentialsId,String cfApiEndpoint,String cfOrg,String cfSpace,String approuterName) {
+    def VCAP
+    withCredentials([usernamePassword(
+        credentialsId: cfCredentialsId,
+        passwordVariable: 'cfPassword',
+        usernameVariable: 'cfUser'
+        )]) {
+        sh "cf login -u ${cfUser} -p ${cfPassword} -a ${cfApiEndpoint} -o ${cfOrg} -s ${cfSpace}"
+        String appGuid = sh(returnStdout: true,script:"cf app --guid $approuterName").trim()
+                
+        VCAP = getJsonFromShellComand("cf curl /v2/apps/${appGuid}/env")
+        
+    }
+    return VCAP
+}
+
+public String getAccessToken(String subdomain,String clientId,String clientSecret) {
+       
+    String headerContentType="Content-Type:application/x-www-form-urlencoded"
+    String headerAccept="Accept:application/json"
+    
+    
+    List<String> data= ["client_id=$clientId",
+                        "client_secret=$clientSecret",
+                        "grant_type=password",
+                        "token_format=opaque",
+                        "response_type=token"]
+     withCredentials([usernamePassword(
+        credentialsId: 'RoleCollectionAdminId',
+        passwordVariable: 'authPassword',
+        usernameVariable: 'authUsername'
+        )]) {
+        data.add("username=$authUsername")
+        data.add("password=$authPassword")
+    }                          
+    String comand= "curl -fsSL -X POST -H $headerContentType -H $headerAccept "
+    
+    for (String s in data) {
+        comand = comand + " --data-urlencode '$s'" }
+    
+    comand = comand +" https://${subdomain}.authentication.sap.hana.ondemand.com/oauth/token"    
+    println comand
+    def returnJson = getJsonFromShellComand(comand)
+    
+    return returnJson.access_token
+}
+
+List getRoleTemplates(String subdomain, Header header, String xsAppName) {
+    String url="https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/${xsAppName}/roletemplates"
+
+    String comand= "curl -fsSL -X GET ${header.toString()} $url"
+    return getJsonFromShellComand(comand).roleTemplates
+}
+
+def createRoleFromTemplate(String subdomain,Header header,Role role) {
+    String dataJson= role.asJson()
+    String url = "https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/${role.template.appId}/roletemplates/${role.template.name}/roles/${role.name}"
+    String comand= "curl -fsSL -X POST ${header.toString()} --data-raw '$dataJson' $url"
+    println getJsonFromShellComand(comand)
+}
+ 
+def deleteRole(String subdomain,Header header,Role role){
+    String url = "https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/apps/${role.template.appId}/roletemplates/${role.template.name}/roles/${role.name}"
+    String comand= "curl -fIsSL -X DELETE ${header.toString()} $url"
+    println sh(returnStdout: true,script:comand)
+}
+
+
+def createRoleCollection(String subdomain,Header header,String roleCollectionName,String description){
+
+    String url ="https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/${roleCollectionName}?description=${description}"
+    String comand= "curl -fsSL -X POST ${header.toString()} $url"
+    String result = sh(returnStdout: true,script:comand)
+    println "createRoleCollection: ${result}"
+}
+
+
+def addRoleToCollection(String subdomain,Header header,String roleCollectionName,Role role) {
+    String dataJson= role.asJson()
+    String url="https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/${roleCollectionName}/roles"
+    
+    String comand= "curl -fsSL -X PUT ${header.toString()} --data-raw '$dataJson' $url"
+    
+    String result = sh(returnStdout: true,script:comand)
+    println "addRoleToCollection: ${result}"
+}
+
+
+def deleteRoleCollection(String subdomain,Header header,String roleCollectionName){
+
+    String url ="https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/rolecollections/${roleCollectionName}"
+    String comand= "curl -fIsSL -X DELETE ${header.toString()} $url"
+    String result = sh(returnStdout: true,script:comand)
+    println "deleteRoleCollection: ${result}"
+}
+
+
+def createMapOfRoleCollectionToSamlId(String subdomain,Header header,String roleCollectionName,String samlIdName) {
+
+    String url = "https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/saml-IdP/xsuaa-monitoring-idp/saml-attribute/Groups/equals/${samlIdName}/rolecollections/${roleCollectionName}"
+    String comand = "curl -fIsSL -X POST ${header.toString()} $url"
+    String result = sh(returnStdout: true,script:comand)
+    println "createMapOfRoleCollectionToSamlId: ${result}"
+}
+
+def deleteMapOfRoleCollectionToSamlId(String subdomain,Header header,String roleCollectionName,String samlIdName) {
+
+    String url = "https://${subdomain}.authentication.sap.hana.ondemand.com/sap/rest/authorization/saml-IdP/xsuaa-monitoring-idp/saml-attribute/Groups/equals/${samlIdName}/rolecollections/${roleCollectionName}"
+    String comand = "curl -fIsSL -X DELETE ${header.toString()} $url"
+    String result = sh(returnStdout: true,script:comand)
+    println "deleteMapOfRoleCollectionToSamlId: ${result}"
+}
+
+ 
+class RoleTemplate{
+    String name
+    String appId
+    
+    public RoleTemplate(String name,String appId){
+        this.name=name
+        this.appId=appId
+    }
+}
+
+class Role{
+    String name
+    String description
+    RoleTemplate template
+    
+    public Role(String name, String description,RoleTemplate template){
+        this.name=name
+        this.description=description
+        this.template=template
+    }
+    
+    public String asJson(){
+        String jsonString = $/{"roleTemplateName":"${template.name}","roleTemplateAppId":"${template.appId}","name":"$name","description":"$description"}/$
+        return jsonString
+    }       
+}
+
+class Header{
+    String token
+    
+    public Header(String token){
+        this.token=token
+    }
+    
+    public String toString(){
+        String headerContentType="Content-Type:application/json"
+        String headerAuth="Authorization:'Bearer $token'"
+        return "-H $headerContentType -H $headerAuth " 
+    }
+}
+
+
+
+

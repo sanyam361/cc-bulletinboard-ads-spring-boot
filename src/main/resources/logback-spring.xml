@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<include resource="org/springframework/boot/logging/logback/base.xml" />
+
+	<appender name="STDOUT-JSON" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="com.sap.hcp.cf.logback.encoder.JsonEncoder" />
+	</appender>
+	<!-- for local development, you may want to switch to a more human-readable 
+		layout -->
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date %-5level [%thread] - [%logger] [%mdc] - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+
+	<springProfile name="cloud">
+		<root level="${LOG_ROOT_LEVEL:-WARN}">
+			<appender-ref ref="STDOUT-JSON" />
+		</root>
+		<!-- Write all audit logs -->
+		<logger name="audit.configuration" level="ALL" additivity="false">
+			<appender-ref ref="STDOUT-JSON" />
+		</logger>
+		<!-- request metrics are reported using INFO level, so make sure the instrumentation 
+			loggers are set to that level -->
+		<logger name="com.sap.hcp.cf" level="WARN" additivity="false">
+			<appender-ref ref="STDOUT-JSON" />
+		</logger>
+		<logger name="org.springframework.web" level="WARN" additivity="false">
+			<appender-ref ref="STDOUT-JSON" />
+		</logger>
+		<logger name="com.sap.bulletinboard" level="INFO" additivity="false">
+			<appender-ref ref="STDOUT-JSON" />
+		</logger>
+		<logger name="com.sap.xs2.security" level="WARN" additivity="false">
+			<appender-ref ref="STDOUT-JSON" />
+		</logger>
+	</springProfile>
+
+	<springProfile name="local,default">
+		<root level="${LOG_ROOT_LEVEL:-WARN}">
+			<!-- Use 'STDOUT' instead for human-readable output -->
+			<appender-ref ref="STDOUT" /> <!-- CONSOLE -->
+		</root>
+		<!-- Write all audit logs -->
+		<logger name="audit.configuration" level="ALL" additivity="false">
+			<appender-ref ref="STDOUT" />
+		</logger>
+		<!-- request metrics are reported using INFO level, so make sure the instrumentation 
+			loggers are set to that level -->
+		<logger name="com.sap.hcp.cf" level="INFO" additivity="false">
+			<appender-ref ref="STDOUT" />
+		</logger>
+		<logger name="org.springframework.web" level="INFO" additivity="false">
+			<appender-ref ref="STDOUT" />
+		</logger>
+		<logger name="com.sap.bulletinboard" level="INFO" additivity="false">
+			<appender-ref ref="STDOUT" />
+		</logger>
+		<logger name="com.sap.xs2.security" level="INFO" additivity="false">
+			<appender-ref ref="STDOUT" />
+		</logger>
+	</springProfile>
+</configuration>

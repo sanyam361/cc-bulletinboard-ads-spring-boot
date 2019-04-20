@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: create-sequence-advertisement.yaml
+      relativeToChangelogFile: true
+  - include:
+      file: create-table-advertisement.yaml
+      relativeToChangelogFile: true

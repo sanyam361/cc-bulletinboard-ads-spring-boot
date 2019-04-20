@@ -1,0 +1,15 @@
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core">
+	<Dialog
+		title="Confirm Delete" type="message" class="sapUiContentPadding">
+		<content>
+		</content>
+		<beginButton>
+			<Button text="Confirm" id="AdTiles-Del"/>
+		</beginButton>
+		<endButton>
+			<Button text="Cancel"  id="AdTiles-Cancel-Del"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

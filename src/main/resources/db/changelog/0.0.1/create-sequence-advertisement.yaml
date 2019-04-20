@@ -1,0 +1,10 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: abcde
+      changes:
+        - createSequence:
+            sequenceName: advertisement_sequence
+            cycle: false
+            startValue: 200
+            incrementBy: 1

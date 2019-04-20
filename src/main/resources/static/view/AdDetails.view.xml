@@ -1,0 +1,63 @@
+<mvc:View
+    controllerName="sap.demo.bulletinboard.controller.AdDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:semantic="sap.m.semantic"
+    xmlns:f="sap.ui.layout.form">
+
+    <!-- TODO Show ALL properties of the ad -> more fields -->
+    <semantic:FullscreenPage
+        title="Advertisement {id}: {title}"
+        showNavButton="true"
+        navButtonPress="onNavBack">
+        <semantic:content>
+            <f:SimpleForm id="AdDetails"
+	            maxContainerCols="2"
+	            editable="true"
+	            layout="ResponsiveGridLayout"
+	            title="Details of the Advertisements"
+	            labelSpanL="3"
+	            labelSpanM="3"
+	            emptySpanL="4"
+	            emptySpanM="4"
+	            columnsL="1"
+	            columnsM="1">
+	            <f:content>
+	                <Label text="Title" />
+	                <Text text="{title}" />
+                    <Label text="Category" />
+                    <Text text="{category}" />
+                    <Label text="Contact" />
+                    <Text text="{contact}" type="Email" />
+	                <Label text="Price" />
+	                <Text text="{
+	                    parts: [ { path: 'price' }, { path: 'currency' } ],
+                        type : 'sap.ui.model.type.Currency',
+                        formatOptions : { showMeasure : true }
+                    }" />
+	                <Label text="Purchased" />
+	                <Text text="{
+                        path: 'purchasedOn',
+                        formatter: '.formatter.millisecondsAsFormattedDate'
+                    }" />
+                    <Label text="Last Updated" />
+                    <Text text="{
+                        path: 'metadata/modifiedAt',
+                        formatter: '.formatter.iso8601AsFormattedDateTime'
+                    }" />
+                    <Label text="Created" />
+                    <Text text="{
+                        path: 'metadata/createdAt',
+                        formatter: '.formatter.iso8601AsFormattedDateTime'
+                    }" />
+	            </f:content>
+	        </f:SimpleForm>
+	    </semantic:content>
+
+        <semantic:deleteAction>
+            <semantic:DeleteAction press="onDelete" id="AdDetails-Del"/>
+        </semantic:deleteAction>
+    </semantic:FullscreenPage>
+</mvc:View>

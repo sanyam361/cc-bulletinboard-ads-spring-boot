@@ -1,0 +1,16 @@
+<mvc:View
+	controllerName="sap.demo.bulletinboard.controller.BaseController"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m">
+
+	<MessagePage
+		title="Navigation target not found"
+		text="Navigation target not found"
+		id="page"
+		description="">
+		<customDescription>
+			<Link id="link" text="Return to list of ads" press="onNavBack" />
+		</customDescription>
+	</MessagePage>
+
+</mvc:View>

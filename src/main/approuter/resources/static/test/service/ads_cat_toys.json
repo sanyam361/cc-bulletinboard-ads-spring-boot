@@ -1,0 +1,32 @@
+{
+	"value": [
+		{
+			"id": 4,
+			"title": "Monchhichi (23 cm)",
+			"version": 1,
+			"metadata": {
+				"createdAt": "2017-09-03T20:23:45.414+01:00",
+				"modifiedAt": null
+			},
+			"price": 5.99,
+			"contact": "me@somewhere.com",
+			"currency": "EUR",
+			"category": "Toys",
+			"purchasedOn": 544147200000
+		},
+		{
+			"id": 5,
+			"title": "Lion (55 cm)",
+			"version": 1,
+			"metadata": {
+				"createdAt": "2017-01-03T20:23:45.414+01:00",
+				"modifiedAt": null
+			},
+			"price": 15,
+			"contact": "me@somewhere.com",
+			"currency": "EUR",
+			"category": "Toys",
+			"purchasedOn": 623635200000
+		}
+	]
+}

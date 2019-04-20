@@ -1,0 +1,94 @@
+{
+	"sAppModulePath" : "sap/demo/bulletinboard/",
+	"unit" : {
+		"default" : true
+	},
+	"integration" : {
+		"navigation" : {
+			"sPathId" : "#/Ads/",
+			"sPathCreate" : "#/NewAd"
+		},
+		"advertisements" : {
+			"iNumberOfAds" : 5,
+			"iNumberOfToysAds" : 2,
+			"iNumberOfBDDVDAds" : 3,
+			"sCategoryAll" : "Display All",
+			"sCategoryToys" : "Toys",
+			"sCategoryBDDVD" : "Blu-Ray/DVD",
+			"overviewAdDetails" : {
+				"sTitle" : "Kill Bill Vol.1+2 (Blu-Ray)",
+				"sPrice" : "19.99",
+				"sCurrency" : "EUR",
+				"sContact" : "u.k@sap.com"
+			},
+			"sFilterDialogId" : "AdsFilter",
+			"sFilterButtonText" : "Filter",
+			"sDeleteButtonText" : "Delete Ads"
+		},
+		"addetails" : {
+			"sId" : "4",
+			"sTitle" : "Monchhichi (23 cm)",
+			"sPriceAndCurrency" : "EUR 5.99",
+			"sPrice" : "5.99",
+			"sCurrency" : "EUR",
+			"sContact" : "me@somewhere.com",
+			"sCategory" : "Toys",
+			"sPurchased" : "Mar 31, 1987",
+			"sCreated" : "Apr 27, 2017, 7:25:34 PM"
+		},
+		"createad" : {
+			"newAd" : {
+				"sTitle" : "Porcupine Tree: Anesthetize (Blu-Ray)",
+				"sPrice" : "15.49",
+				"sPriceOverview" : "15.49",
+				"sCurrency" : "CHF",
+				"sContact" : "m.p@sap.com",
+				"sCategory" : "Blu-Ray/DVD",
+				"sPurchased" : "Jun 7, 2017"
+			},
+			"adSample" : {
+				"sTitle" : "Test: Lion (55 cm)",
+				"sPrice" : "15.00",
+				"sPriceOverview" : "15",
+				"sCurrency" : "EUR",
+				"sContact" : "me@somewhere.com",
+				"sCategory" : "Toys"
+			},
+			"iNumberOfFormFields" : 11,
+			"sSampleButtonText" : "Fill in Sample",
+			"sFormId" : "AdDetails",
+			"fields" : {
+				"title" : {
+					"iIndex" : 1,
+					"sLabel" : "Title"
+				},
+				"price" : {
+					"iIndex" : 7,
+					"sLabel" : "Price / Currency"
+				},
+				"currency" : {
+					"iIndex" : 8,
+					"sLabel" : "Price / Currency"
+				},
+				"contact" : {
+					"iIndex" : 5,
+					"sLabel" : "Contact"
+				},
+				"category" : {
+					"iIndex" : 3,
+					"sLabel" : "Category"
+				},
+				"purchased" : {
+					"iIndex" : 10,
+					"sLabel" : "Purchase Date"
+				}
+			}
+		}
+	},
+	"service" : {
+		"sJsonFilesModulePath" : "sap/demo/bulletinboard/test/service",
+		"sMetadataFileName" : "metadata.xml",
+		"sRootUri" : "/ads/api/v1/",
+		"sRequestsPath" : "ads?(.*)"
+	}
+}

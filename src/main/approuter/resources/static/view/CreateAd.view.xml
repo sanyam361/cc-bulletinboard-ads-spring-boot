@@ -1,0 +1,59 @@
+<mvc:View
+    controllerName="sap.demo.bulletinboard.controller.CreateAd"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:l="sap.ui.layout"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:semantic="sap.m.semantic"
+    xmlns:f="sap.ui.layout.form">
+
+    <semantic:FullscreenPage
+        title="Create New Advertisement"
+        showNavButton="true"
+        navButtonPress="onNavBack">
+        <semantic:content>
+            <f:SimpleForm id="AdDetails"
+	            maxContainerCols="2"
+	            editable="true"
+	            layout="ResponsiveGridLayout"
+	            title="Details for Your New Ad"
+	            labelSpanL="3"
+	            labelSpanM="3"
+	            emptySpanL="4"
+	            emptySpanM="4"
+	            columnsL="1"
+	            columnsM="1"
+	            class="editableForm">
+	            <f:content>
+	                <Label text="Title" />
+	                <Input value="{adDetails>/title}" />
+                    <Label text="Category" />
+                    <Input value="{adDetails>/category}" />
+                    <Label text="Contact" />
+                    <Input value="{adDetails>/contact}" type="Email" />
+	                <Label text="Price / Currency" />
+	                <Input value="{
+	                    parts: [ { path : 'adDetails>/price' }, { path : 'adDetails>/currency' } ],
+	                    type : 'sap.ui.model.type.Currency',
+	                    formatOptions : { showMeasure : false }
+	                }" >
+	                    <layoutData>
+	                        <l:GridData span="L2 M2 S4" />
+	                    </layoutData>
+	                </Input>
+	                <Input value="{adDetails>/currency}" />
+	                <Label text="Purchase Date" />
+	                <DatePicker dateValue="{adDetails>/purchasedOn}" displayFormat="medium" />
+	            </f:content>
+	        </f:SimpleForm>
+        </semantic:content>
+
+        <semantic:customFooterContent>
+            <Button text="Fill in Sample" press="onSampleFill"/>
+        </semantic:customFooterContent>
+        <semantic:saveAction>
+            <semantic:SaveAction press="onSave" id="CreateAd-Save"/>
+        </semantic:saveAction>
+
+    </semantic:FullscreenPage>
+</mvc:View>

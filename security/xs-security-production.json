@@ -1,0 +1,45 @@
+{
+    "xsappname"     : "bulletinboard-production",
+    "description"   : "Enabled bulletinboard for multi tenants",
+    "tenant-mode"   : "shared",
+    "scopes"        : [
+                        {
+                          "name"                 : "$XSAPPNAME.Display",
+                          "description"          : "Display Advertisements"
+                        },
+                        {
+                          "name"                 : "$XSAPPNAME.Update",
+                          "description"          : "Update Advertisements"
+                        },
+                        { "name"                 : "xs_authorization.read",
+                          "description"          : "Audit Authorizations"
+                        },
+                        { "name"                 : "xs_authorization.write",
+                          "description"          : "Administrate Authorizations"
+                        }
+                      ],
+    "role-templates": [
+                        {
+                          "name"                 : "Viewer",
+                          "description"          : "View Advertisements",
+                          "scope-references"     : [
+                                                     "$XSAPPNAME.Display"
+                                                   ]
+                        },
+                        {
+                          "name"                 : "Advertiser",
+                          "description"          : "Maintain Advertisements",
+                          "scope-references"     : [
+                                                     "$XSAPPNAME.Display",             
+                                                     "$XSAPPNAME.Update"
+                                                   ]                                            
+                        },
+                        { "name"                 : "AuthAdmin",
+                          "description"          : "Administrate Authorizations",
+                          "scope-references"     : [
+                                                     "xs_authorization.read",
+                                                     "xs_authorization.write"
+                                                   ]
+                        }
+    ]
+}

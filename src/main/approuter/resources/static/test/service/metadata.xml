@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0"
+	xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+	<edmx:DataServices m:DataServiceVersion="2.0"
+		xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+		<Schema Namespace="BULLETINBOARD" xml:lang="en"
+			xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+
+			<EntityType Name="Advertisement" sap:content-version="1"
+				xmlns:sap="http://www.sap.com/Protocols/SAPData">
+				<Key>
+					<PropertyRef Name="id" />
+				</Key>
+				<Property Name="id" Type="Edm.Int16" Nullable="false"
+					sap:label="Advertisement ID" sap:creatable="false"
+					sap:updatable="false" />
+				<Property Name="version" Type="Edm.Int16" Nullable="false"
+					sap:label="Advertisement ID" sap:creatable="false"
+					sap:updatable="false" />
+				<Property Name="title" Type="Edm.String" Nullable="false"
+					MaxLength="255" sap:label="Title" sap:creatable="false"
+					sap:updatable="false" />
+				<Property Name="createdAt" Type="Edm.DateTime" Nullable="false"
+					sap:label="Placed On" sap:creatable="false"
+					sap:updatable="false" sap:sortable="true" />
+				<Property Name="modifiedAt" Type="Edm.DateTime" Nullable="true"
+					sap:label="Updated On" sap:creatable="false"
+					sap:updatable="true" sap:sortable="true" />
+				<Property Name="purchasedOn" Type="Edm.DateTime" Nullable="false"
+					sap:label="Purchase Date" sap:creatable="false"
+					sap:updatable="false" sap:sortable="true" />
+				<Property Name="category" Type="Edm.String" Nullable="false"
+					MaxLength="60" sap:label="Category" sap:creatable="false"
+					sap:updatable="false" sap:sortable="true" />
+			    <Property Name="contact" Type="Edm.String" Nullable="false"
+					MaxLength="255" sap:label="Contact" sap:creatable="false"
+					sap:updatable="false" sap:sortable="true" />
+				<Property Name="currency" Type="Edm.String" Nullable="false"
+					MaxLength="3" sap:label="Unit of Measure" sap:creatable="false"
+					sap:updatable="false" sap:sortable="true" sap:filterable="false" />
+				<Property Name="price" Type="Edm.Decimal" Nullable="false"
+					Precision="23" Scale="4" sap:label="Unit Number" sap:creatable="false"
+					sap:updatable="false" sap:filterable="false" />
+			</EntityType>
+
+			<EntityContainer Name="BULLETINBOARD_ENTITIES"
+				m:IsDefaultEntityContainer="true">
+				<EntitySet Name="ads" EntityType="BULLETINBOARD.Advertisement"
+					sap:creatable="false" sap:updatable="false" sap:deletable="false"
+					sap:pageable="false" sap:content-version="1"
+					xmlns:sap="http://www.sap.com/Protocols/SAPData" />
+			</EntityContainer>
+		</Schema>
+	</edmx:DataServices>
+</edmx:Edmx>

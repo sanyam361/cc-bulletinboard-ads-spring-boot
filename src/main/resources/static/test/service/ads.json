@@ -1,0 +1,73 @@
+{
+    "value": [
+	{
+		"id": 1,
+		"title": "Star Wars Episode I-VI (Blu-Ray, 2012)",
+		"version": 1,
+		"metadata": {
+			"createdAt": "2017-12-05T20:23:45.414+01:00",
+			"modifiedAt": null
+		},
+		"price": 40,
+		"contact": "u.k@sap.com",
+		"currency": "EUR",
+		"category": "Blu-Ray/DVD",
+		"purchasedOn": 1356220800000
+	},
+	{
+		"id": 2,
+		"title": "Kill Bill Vol.1+2 (Blu-Ray)",
+		"version": 1,
+		"metadata": {
+			"createdAt": "2017-10-03T20:23:45.414+01:00",
+			"modifiedAt": null
+		},
+		"price": 19.99,
+		"contact": "u.k@sap.com",
+		"currency": "EUR",
+		"category": "Blu-Ray/DVD",
+		"purchasedOn": 1349136000000
+	},
+	{
+		"id": 3,
+		"title": "Lord of the Rings Trilogy (Blu-Ray, Extended Cut)",
+		"version": 2,
+		"metadata": {
+			"createdAt": "2017-11-03T20:23:45.414+01:00",
+			"modifiedAt": "2017-11-05T20:23:45.414+01:00"
+		},
+		"price": 25,
+		"contact": "u.k@sap.com",
+		"currency": "EUR",
+		"category": "Blu-Ray/DVD",
+		"purchasedOn": 1419292800000
+	},
+	{
+		"id": 4,
+		"title": "Monchhichi (23 cm)",
+		"version": 1,
+		"metadata": {
+			"createdAt": "2017-09-03T20:23:45.414+01:00",
+			"modifiedAt": null
+		},
+		"price": 5.99,
+		"contact": "me@somewhere.com",
+		"currency": "EUR",
+		"category": "Toys",
+		"purchasedOn": 544147200000
+	},
+	{
+		"id": 5,
+		"title": "Lion (55 cm)",
+		"version": 1,
+		"metadata": {
+			"createdAt": "2017-01-03T20:23:45.414+01:00",
+			"modifiedAt": null
+		},
+		"price": 15,
+		"contact": "me@somewhere.com",
+		"currency": "EUR",
+		"category": "Toys",
+		"purchasedOn": 623635200000
+	}
+]}
